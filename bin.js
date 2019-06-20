@@ -50,6 +50,7 @@ for (let i = 0; i < argv.length; i++) {
     console.log(`--lib: tsc --lib  default: 'esnext, dom, dom.iterable'`);
     console.log('--t: tsc -t default: es3');
     console.log('--jsx: tsc -jsx default: react');
+    console.log('--no-css: no copy .css|.scss|.less|.styl file');
     console.log('--other: tsc other script');
     console.log('--help: view this');
     console.log(' ');
@@ -74,7 +75,12 @@ function uglifyFn() {
   if (tsx && out && css) {
     const cssFiles = fs.readdirSync(pwd(tsx));
     cssFiles.forEach(file => {
-      if (file.indexOf('.css') > 0) {
+      if (
+        file.indexOf('.css') > 0 ||
+        file.indexOf('.less') > 0 ||
+        file.indexOf('.scss') > 0 ||
+        file.indexOf('.styl') > 0
+      ) {
         fs.copyFileSync(pwd(tsx, file), pwd(out, file));
       }
     });
