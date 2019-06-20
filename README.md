@@ -1,6 +1,8 @@
 ## tscu
 
-> tscu = tsc + uglify-js
+> tscu = `tsc` + `uglify`
+
+To publish a library with typescript more easily
 
 ## Need dependencies
 
