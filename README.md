@@ -2,7 +2,11 @@
 
 > tscu = tsc + uglify-js
 
-### example:
+## Need dependencies
+
+Project need typescript dependencies
+
+### #xample:
 
 Build tsx and uglify-js, and copy css files:
 
