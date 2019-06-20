@@ -10,6 +10,7 @@ var exec = require('child_process').exec;
 let onlyUglifty = false;
 let stop = false;
 let dirs = [];
+let noc = false;
 let tsx = undefined;
 let out = undefined;
 let css = true;
@@ -43,6 +44,8 @@ for (let i = 0; i < argv.length; i++) {
     other = argv[i + 1];
   } else if (argv[i] === '--no-css') {
     css = false;
+  } else if (argv[i] === '--no-c') {
+    noc = true;
   } else if (argv[i] === '--help') {
     stop = true;
     console.log('--outDir: tsc --outDir');
@@ -72,6 +75,9 @@ if (stop) {
 }
 
 function uglifyFn() {
+  if (noc) {
+    return;
+  }
   if (tsx && out && css) {
     const cssFiles = fs.readdirSync(pwd(tsx));
     cssFiles.forEach(file => {
@@ -85,11 +91,11 @@ function uglifyFn() {
       }
     });
   }
-
   const options = {
-    mangle: {
-      properties: true,
-    },
+    // mangle: {
+    //   properties: true,
+    // },
+    // nameCache: JSON.parse(fs.readFileSync(cacheFileName, 'utf8')),
   };
 
   dirs.forEach(dir => {
