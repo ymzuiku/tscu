@@ -7,11 +7,11 @@
 Build tsx and uglify-js, and copy css files:
 
 ```sh
-tscu example/src/lib --outDir ./es
+npx tscu example/src/lib --outDir ./es
 ```
 
 Only uglify-js dir:
 
 ```sh
-tscu -c ./es
+npx tscu -c ./es
 ```
