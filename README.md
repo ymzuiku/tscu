@@ -8,7 +8,7 @@ To publish a library with typescript more easily
 
 Project need typescript dependencies
 
-### #xample:
+## Example:
 
 Build tsx and uglify-js, and copy css files:
 

@@ -12,12 +12,14 @@ let stop = false;
 let dirs = [];
 let noc = false;
 let tsx = undefined;
-let out = undefined;
+let outDir = undefined;
 let css = true;
 let other = '';
 let lib = 'esnext, dom, dom.iterable';
 let t = 'es3';
 let jsx = 'react';
+let copy = undefined;
+let copyDir = undefined;
 
 for (let i = 0; i < argv.length; i++) {
   if (argv[i] === '-c') {
@@ -27,7 +29,7 @@ for (let i = 0; i < argv.length; i++) {
   } else if (argv[i] === '--tsx') {
     tsx = argv[i + 1];
   } else if (argv[i] === '--outDir') {
-    out = argv[i + 1];
+    outDir = argv[i + 1];
     if (dirs.length === 0) {
       dirs = argv[i + 1].split(',');
       dirs = dirs.map(v => v.trim());
@@ -46,6 +48,11 @@ for (let i = 0; i < argv.length; i++) {
     css = false;
   } else if (argv[i] === '--no-c') {
     noc = true;
+  } else if (argv[i] === '--copy') {
+    copy = argv[i + 1].split(',');
+    copy = copy.map(v => v.trim());
+  } else if (argv[i] === '--copyDir') {
+    copyDir = argv[i + 1];
   } else if (argv[i] === '--help') {
     stop = true;
     console.log('--outDir: tsc --outDir');
@@ -54,11 +61,13 @@ for (let i = 0; i < argv.length; i++) {
     console.log('--t: tsc -t default: es3');
     console.log('--jsx: tsc -jsx default: react');
     console.log('--no-css: no copy .css|.scss|.less|.styl file');
+    console.log('--copy: copy files to --outDir or --copyDir(if have)');
+    console.log('--copyDir: copy files to --copyDir');
     console.log('--other: tsc other script');
     console.log('--help: view this');
     console.log(' ');
     console.log('example build ts|tsx and uglify-js:');
-    console.log('tscu example/src/lib/* --outDir ./es');
+    console.log(`tscu example/src/lib/* --outDir ./es --copy 'package.json, README.md, .npmignore' `);
     console.log(' ');
     console.log('example onliy uglify-js dir:');
     console.log('tscu -c ./es');
@@ -78,7 +87,7 @@ function uglifyFn() {
   if (noc) {
     return;
   }
-  if (tsx && out && css) {
+  if (tsx && outDir && css) {
     const cssFiles = fs.readdirSync(pwd(tsx));
     cssFiles.forEach(file => {
       if (
@@ -87,7 +96,7 @@ function uglifyFn() {
         file.indexOf('.scss') > 0 ||
         file.indexOf('.styl') > 0
       ) {
-        fs.copyFileSync(pwd(tsx, file), pwd(out, file));
+        fs.copyFileSync(pwd(tsx, file), pwd(outDir, file));
       }
     });
   }
@@ -125,18 +134,28 @@ function uglifyFn() {
   });
 }
 
-if (out && !fs.existsSync(pwd(out))) {
-  fs.mkdirSync(pwd(out));
+if (outDir && !fs.existsSync(pwd(outDir))) {
+  fs.mkdirSync(pwd(outDir));
 }
 if (onlyUglifty) {
   uglifyFn();
-} else if (tsx && out) {
-  let str = `npx tsc ${tsx}/* --outDir ${out} --jsx ${jsx} -d true -t ${t} --skipLibCheck true --lib '${lib}' ${other}`;
+} else if (tsx && outDir) {
+  let str = `npx tsc ${tsx}/* --outDir ${outDir} --jsx ${jsx} -d true -t ${t} --skipLibCheck true --lib '${lib}' ${other}`;
   // console.log('typescript-tsc:', str);
   exec(str, function(error, stdout, stderr) {
     if (error !== null) {
       console.log('execAsync error: ' + JSON.stringify(error));
     }
     uglifyFn();
+  });
+}
+
+if (copy) {
+  if (!copyDir) {
+    copyDir = outDir;
+  }
+  copy.forEach(file => {
+    console.log('--------- copy: ', file);
+    fs.copyFileSync(pwd(file), pwd(copyDir, file));
   });
 }
