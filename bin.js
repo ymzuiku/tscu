@@ -49,8 +49,15 @@ for (let i = 0; i < argv.length; i++) {
   } else if (argv[i] === '--no-c') {
     noc = true;
   } else if (argv[i] === '--copy') {
-    copy = argv[i + 1].split(',');
-    copy = copy.map(v => v.trim());
+    const str = argv[i + 1].split(',');
+    copy = [];
+    str.forEach(v => {
+      if (v) {
+        v = v.trim();
+        v = v.replace(/\'/g, '');
+        copy.push(v);
+      }
+    });
   } else if (argv[i] === '--copyDir') {
     copyDir = argv[i + 1];
   } else if (argv[i] === '--help') {
@@ -67,15 +74,13 @@ for (let i = 0; i < argv.length; i++) {
     console.log('--help: view this');
     console.log(' ');
     console.log('example build ts|tsx and uglify-js:');
-    console.log(`tscu example/src/lib/* --outDir ./es --copy 'package.json, README.md, .npmignore' `);
+    console.log(`tscu example/src/lib/*.tsx --outDir ./es --copy 'package.json, README.md, .npmignore' `);
     console.log(' ');
     console.log('example onliy uglify-js dir:');
     console.log('tscu -c ./es');
     console.log(' ');
   } else if (i === 0) {
     tsx = argv[i];
-  } else {
-    other += ' ' + argv[i];
   }
 }
 
@@ -110,7 +115,6 @@ function uglifyFn() {
   dirs.forEach(dir => {
     const dirFiles = fs.readdirSync(pwd(dir));
     dirFiles.forEach(file => {
-      console.log('---------', file);
       // 只编译js, 忽略map
       if (
         file.indexOf('.js') > 0 &&
@@ -118,6 +122,7 @@ function uglifyFn() {
         file.indexOf('.json') < 0 &&
         file.indexOf('.jsx') < 0
       ) {
+        console.log('--------- uglify: ', file);
         const fps = pwd(dir, file);
         fs.writeFileSync(
           fps,
@@ -132,6 +137,14 @@ function uglifyFn() {
       }
     });
   });
+
+  if (copy) {
+    copyDir = copyDir || outDir;
+    copy.forEach(file => {
+      console.log('--------- copy: ', file);
+      fs.copyFileSync(pwd(file), pwd(copyDir, file));
+    });
+  }
 }
 
 if (outDir && !fs.existsSync(pwd(outDir))) {
@@ -140,22 +153,21 @@ if (outDir && !fs.existsSync(pwd(outDir))) {
 if (onlyUglifty) {
   uglifyFn();
 } else if (tsx && outDir) {
-  let str = `npx tsc ${tsx}/* --outDir ${outDir} --jsx ${jsx} -d true -t ${t} --skipLibCheck true --lib '${lib}' ${other}`;
-  // console.log('typescript-tsc:', str);
-  exec(str, function(error, stdout, stderr) {
-    if (error !== null) {
-      console.log('execAsync error: ' + JSON.stringify(error));
+  const files = fs.readdirSync(pwd(tsx));
+  let tsxAllPaths = '';
+  files.forEach(v => {
+    if ((v.indexOf('.ts') > -1 || v.indexOf('.tsx') > -1) && v.indexOf('.d.ts') < 0) {
+      tsxAllPaths += ' ' + pwd(tsx, v);
+      console.log('--------- tsc: ', tsx + '/' + v);
     }
-    uglifyFn();
   });
-}
 
-if (copy) {
-  if (!copyDir) {
-    copyDir = outDir;
-  }
-  copy.forEach(file => {
-    console.log('--------- copy: ', file);
-    fs.copyFileSync(pwd(file), pwd(copyDir, file));
+  let str = `npx tsc${tsxAllPaths} --outDir ${outDir} --jsx ${jsx} -d true -t ${t} --skipLibCheck true --lib '${lib}' ${other}`;
+
+  console.log(str);
+
+  exec(str, function(error, stdout, stderr) {
+    console.log(stdout);
+    uglifyFn();
   });
 }
