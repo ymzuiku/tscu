@@ -164,7 +164,7 @@ if (onlyUglifty) {
 
   let str = `npx tsc${tsxAllPaths} --outDir ${outDir} --jsx ${jsx} -d true -t ${t} --skipLibCheck true --lib '${lib}' ${other}`;
 
-  console.log(str);
+  // console.log(str);
 
   exec(str, function(error, stdout, stderr) {
     console.log(stdout);
