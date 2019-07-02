@@ -25,14 +25,14 @@ for (let i = 0; i < argv.length; i++) {
   if (argv[i] === '-c') {
     onlyUglifty = true;
     dirs = argv[i + 1].split(',');
-    dirs = dirs.map(v => v.trim());
+    dirs = dirs.map((v) => v.trim());
   } else if (argv[i] === '--tsx') {
     tsx = argv[i + 1];
   } else if (argv[i] === '--outDir') {
     outDir = argv[i + 1];
     if (dirs.length === 0) {
       dirs = argv[i + 1].split(',');
-      dirs = dirs.map(v => v.trim());
+      dirs = dirs.map((v) => v.trim());
     }
   } else if (argv[i] === '--lib') {
     lib = argv[i + 1];
@@ -51,7 +51,7 @@ for (let i = 0; i < argv.length; i++) {
   } else if (argv[i] === '--copy') {
     const str = argv[i + 1].split(',');
     copy = [];
-    str.forEach(v => {
+    str.forEach((v) => {
       if (v) {
         v = v.trim();
         v = v.replace(/\'/g, '');
@@ -94,7 +94,7 @@ function uglifyFn() {
   }
   if (tsx && outDir && css) {
     const cssFiles = fs.readdirSync(pwd(tsx));
-    cssFiles.forEach(file => {
+    cssFiles.forEach((file) => {
       if (
         file.indexOf('.css') > 0 ||
         file.indexOf('.less') > 0 ||
@@ -112,9 +112,9 @@ function uglifyFn() {
     // nameCache: JSON.parse(fs.readFileSync(cacheFileName, 'utf8')),
   };
 
-  dirs.forEach(dir => {
+  dirs.forEach((dir) => {
     const dirFiles = fs.readdirSync(pwd(dir));
-    dirFiles.forEach(file => {
+    dirFiles.forEach((file) => {
       // 只编译js, 忽略map
       if (
         file.indexOf('.js') > 0 &&
@@ -140,7 +140,7 @@ function uglifyFn() {
 
   if (copy) {
     copyDir = copyDir || outDir;
-    copy.forEach(file => {
+    copy.forEach((file) => {
       console.log('--------- copy: ', file);
       fs.copyFileSync(pwd(file), pwd(copyDir, file));
     });
@@ -155,16 +155,22 @@ if (onlyUglifty) {
 } else if (tsx && outDir) {
   const files = fs.readdirSync(pwd(tsx));
   let tsxAllPaths = '';
-  files.forEach(v => {
+  files.forEach((v) => {
     if ((v.indexOf('.ts') > -1 || v.indexOf('.tsx') > -1) && v.indexOf('.d.ts') < 0) {
       tsxAllPaths += ' ' + pwd(tsx, v);
       console.log('--------- tsc: ', tsx + '/' + v);
     }
   });
 
-  let str = `npx tsc${tsxAllPaths} --outDir ${outDir} --jsx ${jsx} -d true -t ${t} --skipLibCheck true --lib '${lib}' ${other}`;
+  let str;
 
-  // console.log(str);
+  if (lib === 'default') {
+    str = `npx tsc${tsxAllPaths} --outDir ${outDir} --jsx ${jsx} -d true -t ${t} --skipLibCheck true ${other}`;
+  } else {
+    str = `npx tsc${tsxAllPaths} --outDir ${outDir} --jsx ${jsx} -d true -t ${t} --skipLibCheck true --lib '${lib}' ${other}`;
+  }
+
+  console.log(str);
 
   exec(str, function(error, stdout, stderr) {
     console.log(stdout);
