@@ -158,7 +158,6 @@ if (onlyUglifty) {
   files.forEach((v) => {
     if ((v.indexOf('.ts') > -1 || v.indexOf('.tsx') > -1) && v.indexOf('.d.ts') < 0) {
       tsxAllPaths += ' ' + pwd(tsx, v);
-      console.log('--------- tsc: ', tsx + '/' + v);
     }
   });
 
@@ -166,7 +165,9 @@ if (onlyUglifty) {
 
   if (lib === 'default') {
     str = `npx tsc${tsxAllPaths} --outDir ${outDir} --jsx ${jsx} -d true -t ${t} --skipLibCheck true ${other}`;
-    console.log(`npx tsc ${tsx}/*.(ts|tsx) --outDir ${outDir} --jsx ${jsx} -d true -t ${t} --skipLibCheck true ${other}`);
+    console.log(
+      `npx tsc ${tsx}/*.(ts|tsx) --outDir ${outDir} --jsx ${jsx} -d true -t ${t} --skipLibCheck true ${other}`,
+    );
   } else {
     str = `npx tsc${tsxAllPaths} --outDir ${outDir} --jsx ${jsx} -d true -t ${t} --skipLibCheck true --lib ${lib} ${other}`;
     console.log(
