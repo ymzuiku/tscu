@@ -15,7 +15,7 @@ let tsx = undefined;
 let outDir = undefined;
 let css = true;
 let other = '';
-let lib = 'esnext, dom, dom.iterable';
+let lib = 'esnext,dom,dom.iterable';
 let t = 'es3';
 let jsx = 'react';
 let copy = undefined;
@@ -166,11 +166,13 @@ if (onlyUglifty) {
 
   if (lib === 'default') {
     str = `npx tsc${tsxAllPaths} --outDir ${outDir} --jsx ${jsx} -d true -t ${t} --skipLibCheck true ${other}`;
+    console.log(`npx tsc ${tsx}/*.(ts|tsx) --outDir ${outDir} --jsx ${jsx} -d true -t ${t} --skipLibCheck true ${other}`);
   } else {
-    str = `npx tsc${tsxAllPaths} --outDir ${outDir} --jsx ${jsx} -d true -t ${t} --skipLibCheck true --lib '${lib}' ${other}`;
+    str = `npx tsc${tsxAllPaths} --outDir ${outDir} --jsx ${jsx} -d true -t ${t} --skipLibCheck true --lib ${lib} ${other}`;
+    console.log(
+      `npx tsc ${tsx}/*.(ts|tsx) --outDir ${outDir} --jsx ${jsx} -d true -t ${t} --skipLibCheck true --lib ${lib} ${other}`,
+    );
   }
-
-  console.log(str);
 
   exec(str, function(error, stdout, stderr) {
     console.log(stdout);
