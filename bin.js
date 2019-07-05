@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const UglifyJS = require('uglify-js');
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 const pwd = (...args) => path.resolve(process.cwd(), ...args);
 const argv = process.argv.splice(2);
@@ -16,6 +16,7 @@ let outDir = undefined;
 let css = true;
 let other = '';
 let lib = 'esnext,dom,dom.iterable';
+let outLib = undefined;
 let t = 'es3';
 let jsx = 'react';
 let copy = undefined;
@@ -36,6 +37,8 @@ for (let i = 0; i < argv.length; i++) {
     }
   } else if (argv[i] === '--lib') {
     lib = argv[i + 1];
+  } else if (argv[i] === '--outLib') {
+    outLib = argv[i + 1];
   } else if (argv[i] === '--jsx') {
     jsx = argv[i + 1];
   } else if (argv[i] === '-t') {
@@ -104,6 +107,10 @@ function uglifyFn() {
         fs.copyFileSync(pwd(tsx, file), pwd(outDir, file));
       }
     });
+  }
+  // 如果包含 outLib，则拷贝tsx文件夹到outLib
+  if (tsx && outLib) {
+    fs.copySync(pwd(tsx), pwd(outLib));
   }
   const options = {
     // mangle: {
