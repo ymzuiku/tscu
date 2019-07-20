@@ -93,9 +93,12 @@ if (stop) {
 
 const makeAndClearDir = (dirPath) => {
   if (fs.existsSync(dirPath)) {
-    fs.removeSync(dirPath);
+    fs.readdirSync(dirPath).forEach((file) => {
+      fs.removeSync(dirPath + '/' + 'file');
+    });
+  } else {
+    fs.mkdirSync(dirPath);
   }
-  fs.mkdirSync(dirPath);
 };
 
 function uglifyFn() {
