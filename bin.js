@@ -91,6 +91,13 @@ if (stop) {
   return;
 }
 
+const makeAndClearDir = (dirPath) => {
+  if (fs.existsSync(dirPath)) {
+    fs.remove(dirPath);
+  }
+  fs.mkdirSync(dirPath);
+};
+
 function uglifyFn() {
   if (noc) {
     return;
@@ -110,6 +117,7 @@ function uglifyFn() {
   }
   // 如果包含 outLib，则拷贝tsx文件夹到outLib
   if (tsx && outLib) {
+    makeAndClearDir(pwd(outLib));
     fs.copySync(pwd(tsx), pwd(outLib));
   }
   const options = {
@@ -154,9 +162,10 @@ function uglifyFn() {
   }
 }
 
-if (outDir && !fs.existsSync(pwd(outDir))) {
-  fs.mkdirSync(pwd(outDir));
+if (outDir) {
+  makeAndClearDir(pwd(outDir));
 }
+
 if (onlyUglifty) {
   uglifyFn();
 } else if (tsx && outDir) {
