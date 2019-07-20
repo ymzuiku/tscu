@@ -93,7 +93,7 @@ if (stop) {
 
 const makeAndClearDir = (dirPath) => {
   if (fs.existsSync(dirPath)) {
-    fs.remove(dirPath);
+    fs.removeSync(dirPath);
   }
   fs.mkdirSync(dirPath);
 };

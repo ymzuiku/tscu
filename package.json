@@ -1,6 +1,6 @@
 {
   "name": "tscu",
-  "version": "1.2.5",
+  "version": "1.2.8",
   "main": "index.js",
   "repository": "git@github.com:ymzuiku/tscu.git",
   "license": "MIT",
