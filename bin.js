@@ -94,7 +94,7 @@ if (stop) {
 const makeAndClearDir = (dirPath) => {
   if (fs.existsSync(dirPath)) {
     fs.readdirSync(dirPath).forEach((file) => {
-      fs.removeSync(dirPath + '/' + 'file');
+      fs.removeSync(dirPath + '/' + file);
     });
   } else {
     fs.mkdirSync(dirPath);
