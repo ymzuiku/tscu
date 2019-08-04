@@ -173,12 +173,17 @@ if (onlyUglifty) {
   uglifyFn();
 } else if (tsx && outDir) {
   const files = fs.readdirSync(pwd(tsx));
+  
   let tsxAllPaths = '';
-  files.forEach((v) => {
-    if ((v.indexOf('.ts') > -1 || v.indexOf('.tsx') > -1) && v.indexOf('.d.ts') < 0) {
-      tsxAllPaths += ' ' + pwd(tsx, v);
-    }
-  });
+  if (tsx.indexOf('.ts') > 0 || tsx.indexOf('.tsx') > 0) {
+    tsxAllPaths = tsx
+  } else {
+    files.forEach((v) => {
+      if ((v.indexOf('.ts') > -1 || v.indexOf('.tsx') > -1) && v.indexOf('.d.ts') < 0) {
+        tsxAllPaths += ' ' + pwd(tsx, v);
+      }
+    });
+  }
 
   let str;
 
