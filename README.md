@@ -20,4 +20,8 @@ Only uglify-js dir:
 
 ```sh
 npx tscu -c ./es
+# or
+npx tscu src/barm --outDir es-barm -t es5
+# or
+npx tscu src/barm --outDir es-barm --no-clear
 ```

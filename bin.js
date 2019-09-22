@@ -11,6 +11,7 @@ let onlyUglifty = false;
 let stop = false;
 let dirs = [];
 let noc = false;
+let noclear = false;
 let tsx = undefined;
 let outDir = undefined;
 let css = true;
@@ -26,14 +27,14 @@ for (let i = 0; i < argv.length; i++) {
   if (argv[i] === '-c') {
     onlyUglifty = true;
     dirs = argv[i + 1].split(',');
-    dirs = dirs.map((v) => v.trim());
+    dirs = dirs.map(v => v.trim());
   } else if (argv[i] === '--tsx') {
     tsx = argv[i + 1];
   } else if (argv[i] === '--outDir') {
     outDir = argv[i + 1];
     if (dirs.length === 0) {
       dirs = argv[i + 1].split(',');
-      dirs = dirs.map((v) => v.trim());
+      dirs = dirs.map(v => v.trim());
     }
   } else if (argv[i] === '--lib') {
     lib = argv[i + 1];
@@ -43,18 +44,18 @@ for (let i = 0; i < argv.length; i++) {
     jsx = argv[i + 1];
   } else if (argv[i] === '-t') {
     t = argv[i + 1];
-  } else if (argv[i] === '-t') {
-    t = argv[i + 1];
   } else if (argv[i] === '--other') {
     other = argv[i + 1];
   } else if (argv[i] === '--no-css') {
     css = false;
+  } else if (argv[i] === '--no-clear') {
+    noclear = true;
   } else if (argv[i] === '--no-c') {
     noc = true;
   } else if (argv[i] === '--copy') {
     const str = argv[i + 1].split(',');
     copy = [];
-    str.forEach((v) => {
+    str.forEach(v => {
       if (v) {
         v = v.trim();
         v = v.replace(/\'/g, '');
@@ -91,9 +92,12 @@ if (stop) {
   return;
 }
 
-const makeAndClearDir = (dirPath) => {
+const makeAndClearDir = dirPath => {
   if (fs.existsSync(dirPath)) {
-    fs.readdirSync(dirPath).forEach((file) => {
+    if (noclear) {
+      return;
+    }
+    fs.readdirSync(dirPath).forEach(file => {
       fs.removeSync(dirPath + '/' + file);
     });
   } else {
@@ -107,13 +111,8 @@ function uglifyFn() {
   }
   if (tsx && outDir && css) {
     const cssFiles = fs.readdirSync(pwd(tsx));
-    cssFiles.forEach((file) => {
-      if (
-        file.indexOf('.css') > 0 ||
-        file.indexOf('.less') > 0 ||
-        file.indexOf('.scss') > 0 ||
-        file.indexOf('.styl') > 0
-      ) {
+    cssFiles.forEach(file => {
+      if (file.indexOf('.css') > 0 || file.indexOf('.less') > 0 || file.indexOf('.scss') > 0 || file.indexOf('.styl') > 0) {
         fs.copyFileSync(pwd(tsx, file), pwd(outDir, file));
       }
     });
@@ -130,16 +129,11 @@ function uglifyFn() {
     // nameCache: JSON.parse(fs.readFileSync(cacheFileName, 'utf8')),
   };
 
-  dirs.forEach((dir) => {
+  dirs.forEach(dir => {
     const dirFiles = fs.readdirSync(pwd(dir));
-    dirFiles.forEach((file) => {
+    dirFiles.forEach(file => {
       // 只编译js, 忽略map
-      if (
-        file.indexOf('.js') > 0 &&
-        file.indexOf('.map') < 0 &&
-        file.indexOf('.json') < 0 &&
-        file.indexOf('.jsx') < 0
-      ) {
+      if (file.indexOf('.js') > 0 && file.indexOf('.map') < 0 && file.indexOf('.json') < 0 && file.indexOf('.jsx') < 0) {
         console.log('--------- uglify: ', file);
         const fps = pwd(dir, file);
         fs.writeFileSync(
@@ -148,9 +142,9 @@ function uglifyFn() {
             {
               [fps]: fs.readFileSync(fps, 'utf8'),
             },
-            options,
+            options
           ).code,
-          'utf8',
+          'utf8'
         );
       }
     });
@@ -158,7 +152,7 @@ function uglifyFn() {
 
   if (copy) {
     copyDir = copyDir || outDir;
-    copy.forEach((file) => {
+    copy.forEach(file => {
       console.log('--------- copy: ', file);
       fs.copyFileSync(pwd(file), pwd(copyDir, file));
     });
@@ -173,12 +167,12 @@ if (onlyUglifty) {
   uglifyFn();
 } else if (tsx && outDir) {
   const files = fs.readdirSync(pwd(tsx));
-  
+
   let tsxAllPaths = '';
   if (tsx.indexOf('.ts') > 0 || tsx.indexOf('.tsx') > 0) {
-    tsxAllPaths = tsx
+    tsxAllPaths = tsx;
   } else {
-    files.forEach((v) => {
+    files.forEach(v => {
       if ((v.indexOf('.ts') > -1 || v.indexOf('.tsx') > -1) && v.indexOf('.d.ts') < 0) {
         tsxAllPaths += ' ' + pwd(tsx, v);
       }
@@ -189,14 +183,10 @@ if (onlyUglifty) {
 
   if (lib === 'default') {
     str = `npx tsc${tsxAllPaths} --outDir ${outDir} --jsx ${jsx} -d true -t ${t} --skipLibCheck true ${other}`;
-    console.log(
-      `npx tsc ${tsx}/*.(ts|tsx) --outDir ${outDir} --jsx ${jsx} -d true -t ${t} --skipLibCheck true ${other}`,
-    );
+    console.log(`npx tsc ${tsx}/*.(ts|tsx) --outDir ${outDir} --jsx ${jsx} -d true -t ${t} --skipLibCheck true ${other}`);
   } else {
     str = `npx tsc${tsxAllPaths} --outDir ${outDir} --jsx ${jsx} -d true -t ${t} --skipLibCheck true --lib ${lib} ${other}`;
-    console.log(
-      `npx tsc ${tsx}/*.(ts|tsx) --outDir ${outDir} --jsx ${jsx} -d true -t ${t} --skipLibCheck true --lib ${lib} ${other}`,
-    );
+    console.log(`npx tsc ${tsx}/*.(ts|tsx) --outDir ${outDir} --jsx ${jsx} -d true -t ${t} --skipLibCheck true --lib ${lib} ${other}`);
   }
 
   exec(str, function(error, stdout, stderr) {
